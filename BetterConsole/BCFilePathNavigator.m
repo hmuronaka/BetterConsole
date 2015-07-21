@@ -64,13 +64,28 @@ void BCFilePathNavigator_Handler(CFNotificationCenterRef center, void *observer,
 
         // Some file paths might start with an asterisk
         // to indicate that it's not absolute path.
-        if ([filePath hasPrefix:@"*"]) {
-            filePath = [BCFilePathFinder findFullFilePathByFileName:
-                        [filePath stringByReplacingCharactersInRange:NSMakeRange(0, 1) withString:@""]];
+        
+        NSRegularExpression* regexp = [NSRegularExpression regularExpressionWithPattern:
+                                       @"\\[([a-zA-Z0-9_]+)[^]].*:([\\d]+)" options:0 error:nil];
+        NSTextCheckingResult* matchResult = [regexp firstMatchInString:filePathAndLineNumber options:0 range:NSMakeRange(0, filePathAndLineNumber.length)];
+        NSUInteger lineNumber = 0;
+        if( matchResult.range.location != NSNotFound ) {
+            filePath = [filePathAndLineNumber substringWithRange:[matchResult rangeAtIndex:1]];
+            NSString* lineNumberStr = [filePathAndLineNumber substringWithRange:[matchResult rangeAtIndex:2]];
+            lineNumber = [lineNumberStr integerValue];
+            filePath = [filePath stringByAppendingString:@".m"];
+            filePath = [BCFilePathFinder findFullFilePathByFileName:filePath];
+            NSLog(@"filePath=%@ ln=%d", filePath, (int)lineNumber);
         }
+        
+        
+//        if ([filePath hasPrefix:@"*"]) {
+//            filePath = [BCFilePathFinder findFullFilePathByFileName:
+//                        [filePath stringByReplacingCharactersInRange:NSMakeRange(0, 1) withString:@""]];
+//        }
 
-        NSNumberFormatter* formatter = [[[NSNumberFormatter alloc] init] autorelease];
-        NSUInteger lineNumber = [[formatter numberFromString:[components objectAtIndex:1]] unsignedIntegerValue];
+//        NSNumberFormatter* formatter = [[[NSNumberFormatter alloc] init] autorelease];
+//        NSUInteger lineNumber = [[formatter numberFromString:[components objectAtIndex:1]] unsignedIntegerValue];
 
         [BCFilePathNavigator bestEditorContext:^(id editorContext){
             [BCFilePathNavigator openFilePath:filePath lineNumber:lineNumber inEditorContext:editorContext];
@@ -121,6 +136,7 @@ void BCFilePathNavigator_Handler(CFNotificationCenterRef center, void *observer,
             initWithDocumentURL:[NSURL fileURLWithPath:filePath]
             timestamp:nil
             lineRange:NSMakeRange(MAX(0, lineNumber-1), 1)] autorelease];
+    NSLog(@"openFilePath filePath=%@, location=%@", filePath, location);
 
     [editorContext openEditorOpenSpecifier:
         [NSClassFromString(@"IDEEditorOpenSpecifier")
