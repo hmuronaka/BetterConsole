@@ -36,7 +36,7 @@
     if (!rx) {
         rx = malloc(sizeof(regex_t));
 //        regcomp(rx, "([\\*]?/[^:\n\r]+.[a-zA-Z]:[[:digit:]]+)", REG_EXTENDED);
-        regcomp(rx, "(\\[[a-zA-Z_][^]]*].*:[[:digit:]]+)", REG_EXTENDED);
+        regcomp(rx, "(\\[[a-zA-Z_][^]]*][\\d\\w]*:[[:digit:]]+)", REG_EXTENDED);
     }
     return *rx;
 }

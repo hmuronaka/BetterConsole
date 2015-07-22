@@ -66,7 +66,7 @@ void BCFilePathNavigator_Handler(CFNotificationCenterRef center, void *observer,
         // to indicate that it's not absolute path.
         
         NSRegularExpression* regexp = [NSRegularExpression regularExpressionWithPattern:
-                                       @"\\[([a-zA-Z0-9_]+)[^]].*:([\\d]+)" options:0 error:nil];
+                                       @"\\[([a-zA-Z_][a-zA-Z0-9_]*)[^]].*:([\\d]+)" options:0 error:nil];
         NSTextCheckingResult* matchResult = [regexp firstMatchInString:filePathAndLineNumber options:0 range:NSMakeRange(0, filePathAndLineNumber.length)];
         NSUInteger lineNumber = 0;
         if( matchResult.range.location != NSNotFound ) {
@@ -86,10 +86,11 @@ void BCFilePathNavigator_Handler(CFNotificationCenterRef center, void *observer,
 
 //        NSNumberFormatter* formatter = [[[NSNumberFormatter alloc] init] autorelease];
 //        NSUInteger lineNumber = [[formatter numberFromString:[components objectAtIndex:1]] unsignedIntegerValue];
-
-        [BCFilePathNavigator bestEditorContext:^(id editorContext){
-            [BCFilePathNavigator openFilePath:filePath lineNumber:lineNumber inEditorContext:editorContext];
-        } forFilePath:filePath];
+        if( filePath != nil ) {
+            [BCFilePathNavigator bestEditorContext:^(id editorContext){
+                [BCFilePathNavigator openFilePath:filePath lineNumber:lineNumber inEditorContext:editorContext];
+            } forFilePath:filePath];
+        }
     }
 }
 @end
