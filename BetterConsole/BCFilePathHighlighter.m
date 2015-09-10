@@ -67,15 +67,23 @@ NSArray *BCFilePathHighlighter_findFilePathRanges(NSTextStorage *textStorage) {
 void BCFilePathHighlighter_highlightFilePathRanges(NSTextStorage *textStorage, NSArray *filePathRanges) {
     for (NSValue *rangeValue in filePathRanges) {
         NSRange range = rangeValue.rangeValue;
-        NSString *filePath = [textStorage.string substringWithRange:range];
-
-        [textStorage addAttributes:
-            [NSDictionary dictionaryWithObjectsAndKeys:
-                [NSCursor pointingHandCursor], NSCursorAttributeName,
-                [NSColor darkGrayColor], NSForegroundColorAttributeName,
-                [NSNumber numberWithInt:1], NSUnderlineStyleAttributeName,
-                filePath, @"BetterConsoleFilePath", nil]
-        range:range];
+        
+        @try {
+            NSString *filePath = [textStorage.string substringWithRange:range];
+            
+            [textStorage addAttributes:
+             [NSDictionary dictionaryWithObjectsAndKeys:
+              [NSCursor pointingHandCursor], NSCursorAttributeName,
+              [NSColor darkGrayColor], NSForegroundColorAttributeName,
+              [NSNumber numberWithInt:1], NSUnderlineStyleAttributeName,
+              filePath, @"BetterConsoleFilePath", nil]
+                                 range:range];
+        }
+        @catch (NSException *exception) {
+            NSLog(@"occur exception. exception=%@", exception);
+        }
+        @finally {
+        }
     }
 }
 
@@ -86,4 +94,5 @@ void BCFilePathHighlighter_Handler(CFNotificationCenterRef center, void *observe
         BCFilePathHighlighter_highlightFilePathRanges(textStorage, filePathRanges);
     }
 }
+
 @end
